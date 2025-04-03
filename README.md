@@ -53,7 +53,7 @@ RationalCircuit/
 │   └── 
 ├── utils/
 │   ├── load_model.py
-│   ├── download_data.py
+│   ├── download_gsm8k.py
 │   ├── 
 │   └── 
 ├── requirements.txt
