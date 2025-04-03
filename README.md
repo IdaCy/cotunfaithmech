@@ -54,8 +54,20 @@ RationalCircuit/
 ├── utils/
 │   ├── load_model.py
 │   ├── download_gsm8k.py
-│   ├── 
+│   ├── download_ivan_comparative.py
 │   └── 
 ├── requirements.txt
 └── README.md
 ```
+
+## Getting the Data
+
+cloning:  
+https://github.com/putnambench/putnambench
+
+moving to data/:  
+temp_chainscope/chainscope/data/problems/gsm8k.yaml  
+temp_chainscope/chainscope/data/math_datasets/filtered_putnambench  
+temp_chainscope/chainscope/data/putnam2/minimal_fork_of_putnambench_with_clear_answers.yaml  
+
+
