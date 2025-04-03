@@ -21,9 +21,9 @@ https://huggingface.co/EleutherAI/skip-transcoder-DeepSeek-R1-Distill-Qwen-1.5B-
 ```
 RationalCircuit/
 ├── data/
-│   ├── ivan_dataset/
-│   ├── gsm8k/
-│   └── putnambench/
+│   ├── comparative_pairs.jsonl
+│   ├── gsm8k.jsonl
+│   └── putnambench.jsonl
 ├── experiment_comparative/
 │   ├── hpc/
 │   ├── output/
@@ -69,5 +69,4 @@ moving to data/:
 temp_chainscope/chainscope/data/problems/gsm8k.yaml  
 temp_chainscope/chainscope/data/math_datasets/filtered_putnambench  
 temp_chainscope/chainscope/data/putnam2/minimal_fork_of_putnambench_with_clear_answers.yaml  
-
 
