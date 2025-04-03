@@ -19,7 +19,7 @@ https://huggingface.co/EleutherAI/skip-transcoder-DeepSeek-R1-Distill-Qwen-1.5B-
 
 ## Structure:
 ```
-RationalCircuit/
+cotunfaithmech/
 ├── data/
 │   ├── comparative_pairs.jsonl
 │   ├── gsm8k.jsonl
