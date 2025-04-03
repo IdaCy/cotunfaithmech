@@ -3,6 +3,9 @@ import json
 import os
 import argparse
 
+# Compute the repository root based on this script's location.
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
 # Import model loading and querying functions from utils
 from utils.load_model import load_model
 from utils.query_model import query_model
@@ -53,9 +56,9 @@ def process_comparative_pairs(data_file, output_file, model_and_tokenizer):
 
 def main():
     parser = argparse.ArgumentParser(description="Run comparative experiment using Gwen-1.5 on comparative pairs.")
-    parser.add_argument("--data_file", type=str, default=os.path.join("..", "..", "data", "comparative_pairs.jsonl"),
+    parser.add_argument("--data_file", type=str, default=os.path.join(REPO_ROOT, "data", "comparative_pairs.jsonl"),
                         help="Path to the comparative pairs JSONL file.")
-    parser.add_argument("--output_file", type=str, default=os.path.join("..", "..", "experiment_comparative", "output", "comparative_results.jsonl"),
+    parser.add_argument("--output_file", type=str, default=os.path.join(REPO_ROOT, "experiment_comparative", "output", "comparative_results.jsonl"),
                         help="Path to save the output JSONL file.")
     parser.add_argument("--model_name", type=str, default="Qwen/Qwen1.5-1.8B",
                         help="Name of the model to load.")

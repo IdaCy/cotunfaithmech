@@ -1,5 +1,21 @@
 # CoT Unfaithful Mech Interp
 
+## STATUS - 03/04/25, 23:05
+
+Done:  
+- data downloaded  
+  - comparative pairs  
+  - gsm8k  
+  - putnam  
+- experiment comparative setup  
+  - required utility script in `utils`  
+  - processing script in `experiment_comparative/run_scripts`  
+  - started a run but going to sleep now and checking result tomorrow  
+
+Next:  
+- checking results of comparative check  
+- setting up other two data sorts experiemts  
+
 ## Plan:
 
 1) take comparative questions from Iván's dataset, run Gwen-1.5, check if it gives yes to both 'Is X > Y?' and 'Is Y > X?' / shows restoration errors in gsm8k / shows shortcuts in putnambench-like problems
