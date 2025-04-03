@@ -9,16 +9,16 @@
 
 ## Literature:
 
-https://arxiv.org/pdf/2307.13702
-https://transformer-circuits.pub/2025/attribution-graphs/biology.html#dives-cot
-https://transformer-circuits.pub/2025/attribution-graphs/methods.html
-https://arxiv.org/abs/2503.08679
+https://arxiv.org/pdf/2307.13702  
+https://transformer-circuits.pub/2025/attribution-graphs/biology.html#dives-cot  
+https://transformer-circuits.pub/2025/attribution-graphs/methods.html  
+https://arxiv.org/abs/2503.08679  
 
-https://huggingface.co/EleutherAI/sae-DeepSeek-R1-Distill-Qwen-1.5B-65k
-https://huggingface.co/EleutherAI/skip-transcoder-DeepSeek-R1-Distill-Qwen-1.5B-65k
+https://huggingface.co/EleutherAI/sae-DeepSeek-R1-Distill-Qwen-1.5B-65k  
+https://huggingface.co/EleutherAI/skip-transcoder-DeepSeek-R1-Distill-Qwen-1.5B-65k  
 
 ## Structure:
-
+```
 RationalCircuit/
 ├── README.md
 ├── experiments/
@@ -46,3 +46,4 @@ RationalCircuit/
 │   └── 
 ├── requirements.txt
 └── README.md
+```
