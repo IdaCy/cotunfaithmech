@@ -1,0 +1,28 @@
+name: cotunfaithmech
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pyyaml
+  - numpy
+  - tqdm
+  - requests
+  - ipykernel
+  - jupyter
+  - huggingface_hub
+  - pip:
+      - openai
+      - transformers
+      - datasets
+      - torch
+      - accelerate
+      - einops
+      - sentencepiece
+      - trl
+      - jaxtyping
+      - fancy-einsum
+      - matplotlib
+      - seaborn
+      - jsonlines
