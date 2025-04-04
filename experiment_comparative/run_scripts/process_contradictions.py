@@ -137,7 +137,10 @@ def run_inference(model, tokenizer, question_text, hooked_model=None, logger=Non
     return full_output
 
 
-def run_contradiction_experiment(input_file, output_file, output_csv="", model_name="Qwen/Qwen1.5-1.8B", use_gpu=True):
+def run_contradiction_experiment(input_file, output_file, output_csv="",
+                                 model=None, tokenizer=None,
+                                 model_name="Qwen/Qwen1.5-1.8B",
+                                 use_gpu=True):
     # Initialize comprehensive logging using our provided logger.
     log = init_logger("logs/comparative_mountain_heights.log")
     log.info("Started comparative experiment script.")
@@ -150,13 +153,13 @@ def run_contradiction_experiment(input_file, output_file, output_csv="", model_n
     except Exception as e:
         log.exception(f"Failed to create output directory: {e}")
 
-    log.info(f"Loading model [{model_name}]...")
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    log.debug("Tokenizer loaded successfully.")
-    model = AutoModelForCausalLM.from_pretrained(model_name)
-    model.to(device)
-    model.eval()
-    log.info("Model loaded and moved to device.")
+    if model is None or tokenizer is None:
+        log.info(f"Loading model [{model_name}]...")
+        from utils.load_model import load_model
+        model, tokenizer = load_model(model_name=model_name, use_bfloat16=True, logger=log)
+        model.to(device)
+        model.eval()
+        log.info("Model loaded and moved to device.")
 
     if HookedTransformer is not None:
         try:
