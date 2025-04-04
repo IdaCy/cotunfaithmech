@@ -1,19 +1,19 @@
 # CoT Unfaithful Mech Interp
 
-## STATUS - 03/04/25, 23:05
+## STATUS - 04/04/25, 10:30
 
 Done:  
 - data downloaded  
   - comparative pairs  
   - gsm8k  
   - putnam  
+- data new: tips Ivan
 - experiment comparative setup  
   - required utility script in `utils`  
   - processing script in `experiment_comparative/run_scripts`  
-  - started a run but going to sleep now and checking result tomorrow  
 
 Next:  
-- checking results of comparative check  
+- running comparative experiment
 - setting up other two data sorts experiemts  
 
 ## Plan:
