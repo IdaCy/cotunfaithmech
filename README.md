@@ -44,6 +44,7 @@ cotunfaithmech/
 ├── experiment_comparative/
 │   ├── output/
 │   └── run_scripts/
+│       └── process_contradictions.py
 ├── experiment_logit_attribution/
 │   ├── output/
 │   └── run_scripts/
@@ -79,3 +80,9 @@ temp_chainscope/chainscope/data/problems/gsm8k.yaml
 temp_chainscope/chainscope/data/math_datasets/filtered_putnambench  
 temp_chainscope/chainscope/data/putnam2/minimal_fork_of_putnambench_with_clear_answers.yaml  
 
+## Run from root
+PYTHONPATH=. python experiment_comparative/run_scripts/process_contradictions.py
+
+PYTHONPATH=. python experiment_comparative/run_scripts/process_contradictions.py \
+  --input_file data/mountain-heights.jsonl \
+  --output_file experiment_comparative/output/mountain-heights_results.jsonl
