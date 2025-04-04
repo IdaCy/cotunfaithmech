@@ -81,7 +81,15 @@ class ActivationLogger:
         self.recorded_activations[module_name] = out_cpu
 
 
-def run_inference(model, tokenizer, question_text, hooked_model=None, logger=None, device="cpu"):
+def run_inference(
+    model,
+    tokenizer,
+    question_text,
+    hooked_model=None,
+    py_logger=None,             # <-- For normal Python logging
+    activation_logger=None,     # <-- For hooking
+    device="cpu"
+):
     """
     1. Build a prompt that requests chain-of-thought.
     2. Optionally attach hooks (if using HookedTransformer).
@@ -93,28 +101,25 @@ def run_inference(model, tokenizer, question_text, hooked_model=None, logger=Non
         "Let's reason step by step. Think carefully about the details. "
         "Finally, answer yes or no."
     )
-    if logger:
-        logger.info(f"Built prompt: {prompt}")
+    if py_logger:
+        py_logger.info(f"Built prompt: {prompt}")
     inputs = tokenizer(prompt, return_tensors="pt").to(device)
-    if logger:
-        logger.debug(f"Tokenized inputs: {inputs}")
+    if py_logger:
+        py_logger.debug(f"Tokenized inputs: {inputs}")
 
     if HookedTransformer is not None and isinstance(hooked_model, HookedTransformer):
-        if logger:
-            logger.info("Attaching forward hooks for HookedTransformer.")
-        if logger is not None:
-            # Clear previous activations
-            logger.debug("Clearing previous activations in ActivationLogger.")
-        if logger is not None:
-            # Passed logger here is from ActivationLogger if hooking is used.
-            logger.clear()
+        if py_logger:
+            py_logger.info("Attaching forward hooks for HookedTransformer.")
+        if activation_logger is not None:
+            # Clear old activations
+            activation_logger.clear()
         for name, module in hooked_model.modules.items():
-            module.register_forward_hook(logger.fwd_hook)
-            if logger:
-                logger.debug(f"Attached hook to module: {name}")
+            module.register_forward_hook(activation_logger.fwd_hook)
+            if py_logger:
+                py_logger.debug(f"Attached hook to module: {name}")
 
-    if logger:
-        logger.info("Starting model generation.")
+    if py_logger:
+        py_logger.info("Starting model generation.")
     with torch.no_grad():
         output_ids = model.generate(
             **inputs,
@@ -123,16 +128,17 @@ def run_inference(model, tokenizer, question_text, hooked_model=None, logger=Non
             top_p=0.9,
             temperature=0.7
         )
-    if logger:
-        logger.info("Model generation completed.")
+    if py_logger:
+        py_logger.info("Model generation completed.")
 
     full_output = tokenizer.decode(output_ids[0], skip_special_tokens=True)
-    if logger:
-        logger.debug(f"Raw model output: {full_output}")
+    if py_logger:
+        py_logger.debug(f"Raw model output: {full_output}")
+
     if full_output.startswith(prompt):
         full_output = full_output[len(prompt):].strip()
-        if logger:
-            logger.debug("Removed prompt from the output.")
+        if py_logger:
+            py_logger.debug("Removed prompt from the output.")
 
     return full_output
 
@@ -202,7 +208,8 @@ def run_contradiction_experiment(input_file, output_file, output_csv="",
                     tokenizer=tokenizer,
                     question_text=q1,
                     hooked_model=hooked_model,
-                    logger=activation_logger,
+                    py_logger=log,
+                    activation_logger=activation_logger,
                     device=device
                 )
                 cot1 = output1
@@ -224,7 +231,8 @@ def run_contradiction_experiment(input_file, output_file, output_csv="",
                     tokenizer=tokenizer,
                     question_text=q2,
                     hooked_model=hooked_model,
-                    logger=activation_logger,
+                    py_logger=log,
+                    activation_logger=activation_logger,
                     device=device
                 )
                 cot2 = output2
