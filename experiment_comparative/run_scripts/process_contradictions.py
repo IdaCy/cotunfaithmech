@@ -137,37 +137,23 @@ def run_inference(model, tokenizer, question_text, hooked_model=None, logger=Non
     return full_output
 
 
-def main():
+def run_contradiction_experiment(input_file, output_file, output_csv="", model_name="Qwen/Qwen1.5-1.8B", use_gpu=True):
     # Initialize comprehensive logging using our provided logger.
     log = init_logger("logs/comparative_mountain_heights.log")
     log.info("Started comparative experiment script.")
 
-    parser = argparse.ArgumentParser(description="Run Qwen1.5-1.8B on mountain-height question pairs with chain-of-thought, storing results and hooking intermediate states.")
-    parser.add_argument("--input_file", type=str, default="../data/mountain-heights.jsonl",
-                        help="Path to the input JSONL with question pairs.")
-    parser.add_argument("--output_file", type=str, default="./mountain-heights_results.jsonl",
-                        help="Path to save the output JSONL.")
-    parser.add_argument("--output_csv", type=str, default="",
-                        help="(Optional) If set, also write results to a CSV file.")
-    parser.add_argument("--model_name", type=str, default="Qwen/Qwen1.5-1.8B",
-                        help="Name of the Hugging Face model to load.")
-    parser.add_argument("--use_gpu", type=lambda x: x.lower() == 'true', default=True,
-                        help="Whether to use GPU if available.")
-    args = parser.parse_args()
-    log.info(f"Arguments parsed: {args}")
-
-    device = "cuda" if (args.use_gpu and torch.cuda.is_available()) else "cpu"
+    device = "cuda" if (use_gpu and torch.cuda.is_available()) else "cpu"
     log.info(f"Using device: {device}")
     try:
-        os.makedirs(os.path.dirname(args.output_file), exist_ok=True)
-        log.debug(f"Ensured output directory exists for {args.output_file}")
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        log.debug(f"Ensured output directory exists for {output_file}")
     except Exception as e:
         log.exception(f"Failed to create output directory: {e}")
 
-    log.info(f"Loading model [{args.model_name}]...")
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    log.info(f"Loading model [{model_name}]...")
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
     log.debug("Tokenizer loaded successfully.")
-    model = AutoModelForCausalLM.from_pretrained(args.model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name)
     model.to(device)
     model.eval()
     log.info("Model loaded and moved to device.")
@@ -175,10 +161,10 @@ def main():
     if HookedTransformer is not None:
         try:
             log.info("Attempting to load HookedTransformer for Qwen (if available).")
-            hooked_model = HookedTransformer.from_pretrained(args.model_name, device=device)
+            hooked_model = HookedTransformer.from_pretrained(model_name, device=device)
             log.info("HookedTransformer loaded successfully.")
         except Exception as e:
-            log.exception(f"Could not load HookedTransformer for {args.model_name}: {e}")
+            log.exception(f"Could not load HookedTransformer for {model_name}: {e}")
             hooked_model = None
     else:
         hooked_model = None
@@ -189,8 +175,8 @@ def main():
 
     results = []
     try:
-        with open(args.input_file, 'r', encoding='utf-8') as infile:
-            log.info(f"Opened input file: {args.input_file}")
+        with open(input_file, 'r', encoding='utf-8') as infile:
+            log.info(f"Opened input file: {input_file}")
             for line_idx, line in enumerate(infile):
                 line = line.strip()
                 if not line:
@@ -274,17 +260,17 @@ def main():
         log.exception(f"Error processing input file: {e}")
 
     try:
-        with open(args.output_file, 'w', encoding='utf-8') as fout:
+        with open(output_file, 'w', encoding='utf-8') as fout:
             for rec in results:
                 fout.write(json.dumps(rec) + "\n")
-        log.info(f"Wrote {len(results)} results to {args.output_file}")
+        log.info(f"Wrote {len(results)} results to {output_file}")
     except Exception as e:
         log.exception(f"Error writing output JSONL file: {e}")
 
-    if args.output_csv:
+    if output_csv:
         try:
-            os.makedirs(os.path.dirname(args.output_csv), exist_ok=True)
-            with open(args.output_csv, 'w', newline='', encoding='utf-8') as csvfile:
+            os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+            with open(output_csv, 'w', newline='', encoding='utf-8') as csvfile:
                 fieldnames = ["id", "q1", "cot1", "a1", "q2", "cot2", "a2", "flags"]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
@@ -299,14 +285,29 @@ def main():
                         "a2": rec["a2"],
                         "flags": "|".join(rec["flags"])
                     })
-            log.info(f"Wrote CSV file to {args.output_csv}")
+            log.info(f"Wrote CSV file to {output_csv}")
         except Exception as e:
             log.exception(f"Error writing output CSV file: {e}")
 
-    print(f"Done! Wrote {len(results)} lines to {args.output_file}")
-    if args.output_csv:
-        print(f"Also wrote CSV to {args.output_csv}")
+    print(f"Done! Wrote {len(results)} lines to {output_file}")
+    if output_csv:
+        print(f"Also wrote CSV to {output_csv}")
     log.info("Comparative experiment script finished successfully.")
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    parser = argparse.ArgumentParser(description="Run Qwen1.5-1.8B on mountain-height question pairs with chain-of-thought, storing results and hooking intermediate states.")
+    parser.add_argument("--input_file", type=str, default="../data/mountain-heights.jsonl")
+    parser.add_argument("--output_file", type=str, default="./mountain-heights_results.jsonl")
+    parser.add_argument("--output_csv", type=str, default="")
+    parser.add_argument("--model_name", type=str, default="Qwen/Qwen1.5-1.8B")
+    parser.add_argument("--use_gpu", type=lambda x: x.lower() == 'true', default=True)
+    args = parser.parse_args()
+
+    run_contradiction_experiment(
+        input_file=args.input_file,
+        output_file=args.output_file,
+        output_csv=args.output_csv,
+        model_name=args.model_name,
+        use_gpu=args.use_gpu
+    )
