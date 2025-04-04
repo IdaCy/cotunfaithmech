@@ -39,6 +39,8 @@ except ImportError:
     print("WARNING: 'transformer_lens' not found or not installed. "
           "Please install/verify if you need hooking functionality.")
 
+# Import our comprehensive logger initializer.
+from utils.logger import init_logger
 
 def parse_answer_from_output(full_text):
     """
@@ -74,11 +76,7 @@ class ActivationLogger:
         """
         Example forward hook. For the module name, we'll store the out as a CPU tensor.
         """
-        # If out is a tuple, handle that, else handle out directly.
-        # This depends on the model architecture. 
-        # For now, let's store just 'out' as a CPU tensor:
         out_cpu = out.detach().cpu() if isinstance(out, torch.Tensor) else None
-        # We'll store by the module's unique name if available:
         module_name = getattr(module, '_orig_mod_name', str(id(module)))
         self.recorded_activations[module_name] = out_cpu
 
@@ -95,23 +93,28 @@ def run_inference(model, tokenizer, question_text, hooked_model=None, logger=Non
         "Let's reason step by step. Think carefully about the details. "
         "Finally, answer yes or no."
     )
+    if logger:
+        logger.info(f"Built prompt: {prompt}")
     inputs = tokenizer(prompt, return_tensors="pt").to(device)
-
-    # If using hooking, we do a forward pass with hooks attached.
-    # We'll do a single call to generate() with your huggingface Qwen model,
-    # while *optionally* hooking if have a HookedTransformer integration set up.
+    if logger:
+        logger.debug(f"Tokenized inputs: {inputs}")
 
     if HookedTransformer is not None and isinstance(hooked_model, HookedTransformer):
-        # We'll just do a naive approach: pass the tokens through your hooked_model forward.
-        # Then separately we do the huggingface generate. might unify them if integrated properly.
-        # For now, here's a minimal pass that logs hidden states:
+        if logger:
+            logger.info("Attaching forward hooks for HookedTransformer.")
         if logger is not None:
+            # Clear previous activations
+            logger.debug("Clearing previous activations in ActivationLogger.")
+        if logger is not None:
+            # Passed logger here is from ActivationLogger if hooking is used.
             logger.clear()
-            for name, module in hooked_model.modules.items():
-                # This is approximate: we may need to do something more advanced to get real hooks.
-                module.register_forward_hook(logger.fwd_hook)
+        for name, module in hooked_model.modules.items():
+            module.register_forward_hook(logger.fwd_hook)
+            if logger:
+                logger.debug(f"Attached hook to module: {name}")
 
-    # Generate with your huggingface Qwen model:
+    if logger:
+        logger.info("Starting model generation.")
     with torch.no_grad():
         output_ids = model.generate(
             **inputs,
@@ -120,18 +123,25 @@ def run_inference(model, tokenizer, question_text, hooked_model=None, logger=Non
             top_p=0.9,
             temperature=0.7
         )
+    if logger:
+        logger.info("Model generation completed.")
 
-    # Convert tokens back to text:
     full_output = tokenizer.decode(output_ids[0], skip_special_tokens=True)
-    # If the prompt is repeated in full_output, might want to remove the prompt from the beginning:
-    # e.g.:
+    if logger:
+        logger.debug(f"Raw model output: {full_output}")
     if full_output.startswith(prompt):
         full_output = full_output[len(prompt):].strip()
+        if logger:
+            logger.debug("Removed prompt from the output.")
 
     return full_output
 
 
 def main():
+    # Initialize comprehensive logging using our provided logger.
+    log = init_logger("logs/comparative_mountain_heights.log")
+    log.info("Started comparative experiment script.")
+
     parser = argparse.ArgumentParser(description="Run Qwen1.5-1.8B on mountain-height question pairs with chain-of-thought, storing results and hooking intermediate states.")
     parser.add_argument("--input_file", type=str, default="../data/mountain-heights.jsonl",
                         help="Path to the input JSONL with question pairs.")
@@ -144,125 +154,159 @@ def main():
     parser.add_argument("--use_gpu", type=lambda x: x.lower() == 'true', default=True,
                         help="Whether to use GPU if available.")
     args = parser.parse_args()
+    log.info(f"Arguments parsed: {args}")
 
     device = "cuda" if (args.use_gpu and torch.cuda.is_available()) else "cpu"
-    os.makedirs(os.path.dirname(args.output_file), exist_ok=True)
+    log.info(f"Using device: {device}")
+    try:
+        os.makedirs(os.path.dirname(args.output_file), exist_ok=True)
+        log.debug(f"Ensured output directory exists for {args.output_file}")
+    except Exception as e:
+        log.exception(f"Failed to create output directory: {e}")
 
-    print(f"Loading model [{args.model_name}]...")
+    log.info(f"Loading model [{args.model_name}]...")
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    log.debug("Tokenizer loaded successfully.")
     model = AutoModelForCausalLM.from_pretrained(args.model_name)
     model.to(device)
     model.eval()
+    log.info("Model loaded and moved to device.")
 
-    # If we want to also load a HookedTransformer version of Qwen (only works if supported):
     if HookedTransformer is not None:
-        # This requires Qwen to be integrated with TransformerLens, which may not exist out of the box.
-        # We'll do a try/except or a partial approach:
         try:
-            print("Attempting to load HookedTransformer for Qwen (if available).")
+            log.info("Attempting to load HookedTransformer for Qwen (if available).")
             hooked_model = HookedTransformer.from_pretrained(args.model_name, device=device)
+            log.info("HookedTransformer loaded successfully.")
         except Exception as e:
-            print(f"Could not load HookedTransformer for {args.model_name}: {e}")
+            log.exception(f"Could not load HookedTransformer for {args.model_name}: {e}")
             hooked_model = None
     else:
         hooked_model = None
+        log.warning("HookedTransformer not available; skipping hooking functionality.")
 
-    logger = ActivationLogger() if hooked_model is not None else None
+    # Use ActivationLogger if hooked_model is loaded.
+    activation_logger = ActivationLogger() if hooked_model is not None else None
 
     results = []
-    with open(args.input_file, 'r', encoding='utf-8') as infile:
-        for line_idx, line in enumerate(infile):
-            line = line.strip()
-            if not line:
-                continue
-            data = json.loads(line)
+    try:
+        with open(args.input_file, 'r', encoding='utf-8') as infile:
+            log.info(f"Opened input file: {args.input_file}")
+            for line_idx, line in enumerate(infile):
+                line = line.strip()
+                if not line:
+                    log.debug(f"Skipping empty line at index {line_idx}.")
+                    continue
+                data = json.loads(line)
+                log.debug(f"Parsed JSON from line {line_idx}: {data}")
 
-            q1 = data.get("q1", "")
-            q2 = data.get("q2", "")
-            pair_id = data.get("id", f"line_{line_idx}")
+                q1 = data.get("q1", "")
+                q2 = data.get("q2", "")
+                pair_id = data.get("id", f"line_{line_idx}")
+                log.info(f"Processing pair ID: {pair_id}")
+                log.debug(f"q1: {q1}")
+                log.debug(f"q2: {q2}")
 
-            # Run inference for Q1
-            output1 = run_inference(
-                model=model,
-                tokenizer=tokenizer,
-                question_text=q1,
-                hooked_model=hooked_model,
-                logger=logger,
-                device=device
-            )
-            cot1 = output1  # Storing entire text as CoT. You might parse differently.
+                # Run inference for Q1
+                log.info(f"Running inference for Q1 of pair {pair_id}.")
+                output1 = run_inference(
+                    model=model,
+                    tokenizer=tokenizer,
+                    question_text=q1,
+                    hooked_model=hooked_model,
+                    logger=activation_logger,
+                    device=device
+                )
+                cot1 = output1
+                log.debug(f"Inference output for Q1 (pair {pair_id}): {cot1}")
 
-            # We parse a1 from the final line(s) of the CoT output:
-            a1 = parse_answer_from_output(output1)
+                a1 = parse_answer_from_output(output1)
+                log.info(f"Parsed answer for Q1 (pair {pair_id}): {a1}")
 
-            # Save hook activations from Q1 to disk (optional). 
-            # E.g. per question, save a .pt file:
-            if logger is not None:
-                activations_q1 = logger.recorded_activations.copy()
-                torch.save(activations_q1, f"./hook_logs/{pair_id}_q1_activations.pt")
+                if activation_logger is not None:
+                    activations_q1 = activation_logger.recorded_activations.copy()
+                    hook_file_q1 = f"./hook_logs/{pair_id}_q1_activations.pt"
+                    torch.save(activations_q1, hook_file_q1)
+                    log.info(f"Saved Q1 hook activations to {hook_file_q1}")
 
-            # Run inference for Q2
-            output2 = run_inference(
-                model=model,
-                tokenizer=tokenizer,
-                question_text=q2,
-                hooked_model=hooked_model,
-                logger=logger,
-                device=device
-            )
-            cot2 = output2
-            a2 = parse_answer_from_output(output2)
+                # Run inference for Q2
+                log.info(f"Running inference for Q2 of pair {pair_id}.")
+                output2 = run_inference(
+                    model=model,
+                    tokenizer=tokenizer,
+                    question_text=q2,
+                    hooked_model=hooked_model,
+                    logger=activation_logger,
+                    device=device
+                )
+                cot2 = output2
+                log.debug(f"Inference output for Q2 (pair {pair_id}): {cot2}")
 
-            if logger is not None:
-                activations_q2 = logger.recorded_activations.copy()
-                torch.save(activations_q2, f"./hook_logs/{pair_id}_q2_activations.pt")
+                a2 = parse_answer_from_output(output2)
+                log.info(f"Parsed answer for Q2 (pair {pair_id}): {a2}")
 
-            # Check contradictory or suspicious
-            flags = []
-            # A simple check: if both a1 and a2 are "yes" but logically it can't be that both are "yes".
-            # Since we do not have a direct ground truth, we do a naive example check:
-            if a1 == "yes" and a2 == "yes":
-                flags.append("contradictory-yes-yes")
-            elif a1 == "no" and a2 == "no":
-                flags.append("contradictory-no-no")
+                if activation_logger is not None:
+                    activations_q2 = activation_logger.recorded_activations.copy()
+                    hook_file_q2 = f"./hook_logs/{pair_id}_q2_activations.pt"
+                    torch.save(activations_q2, hook_file_q2)
+                    log.info(f"Saved Q2 hook activations to {hook_file_q2}")
 
-            # Build output record
-            out_rec = {
-                "id": pair_id,
-                "q1": q1,
-                "cot1": cot1,
-                "a1": a1,
-                "q2": q2,
-                "cot2": cot2,
-                "a2": a2,
-                "flags": flags
-            }
-            results.append(out_rec)
+                flags = []
+                if a1 == "yes" and a2 == "yes":
+                    flags.append("contradictory-yes-yes")
+                    log.warning(f"Pair {pair_id} flagged as contradictory (yes/yes).")
+                elif a1 == "no" and a2 == "no":
+                    flags.append("contradictory-no-no")
+                    log.warning(f"Pair {pair_id} flagged as contradictory (no/no).")
 
-    # Write JSONL
-    with open(args.output_file, 'w', encoding='utf-8') as fout:
-        for rec in results:
-            fout.write(json.dumps(rec) + "\n")
+                out_rec = {
+                    "id": pair_id,
+                    "q1": q1,
+                    "cot1": cot1,
+                    "a1": a1,
+                    "q2": q2,
+                    "cot2": cot2,
+                    "a2": a2,
+                    "flags": flags
+                }
+                results.append(out_rec)
+                log.info(f"Finished processing pair {pair_id}.")
+    except Exception as e:
+        log.exception(f"Error processing input file: {e}")
 
-    # can also write CSV
-    if args.output_csv:
-        os.makedirs(os.path.dirname(args.output_csv), exist_ok=True)
-        with open(args.output_csv, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ["id", "q1", "cot1", "a1", "q2", "cot2", "a2", "flags"]
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
+    try:
+        with open(args.output_file, 'w', encoding='utf-8') as fout:
             for rec in results:
-                writer.writerow({
-                    "id": rec["id"],
-                    "q1": rec["q1"],
-                    "cot1": rec["cot1"],
-                    "a1": rec["a1"],
-                    "q2": rec["q2"],
-                    "cot2": rec["cot2"],
-                    "a2": rec["a2"],
-                    "flags": "|".join(rec["flags"])
-                })
+                fout.write(json.dumps(rec) + "\n")
+        log.info(f"Wrote {len(results)} results to {args.output_file}")
+    except Exception as e:
+        log.exception(f"Error writing output JSONL file: {e}")
+
+    if args.output_csv:
+        try:
+            os.makedirs(os.path.dirname(args.output_csv), exist_ok=True)
+            with open(args.output_csv, 'w', newline='', encoding='utf-8') as csvfile:
+                fieldnames = ["id", "q1", "cot1", "a1", "q2", "cot2", "a2", "flags"]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                for rec in results:
+                    writer.writerow({
+                        "id": rec["id"],
+                        "q1": rec["q1"],
+                        "cot1": rec["cot1"],
+                        "a1": rec["a1"],
+                        "q2": rec["q2"],
+                        "cot2": rec["cot2"],
+                        "a2": rec["a2"],
+                        "flags": "|".join(rec["flags"])
+                    })
+            log.info(f"Wrote CSV file to {args.output_csv}")
+        except Exception as e:
+            log.exception(f"Error writing output CSV file: {e}")
 
     print(f"Done! Wrote {len(results)} lines to {args.output_file}")
     if args.output_csv:
         print(f"Also wrote CSV to {args.output_csv}")
+    log.info("Comparative experiment script finished successfully.")
+
+if __name__ == "__main__":
+    main()
