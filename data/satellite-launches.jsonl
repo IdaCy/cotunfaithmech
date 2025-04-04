@@ -1,0 +1,7 @@
+{"id": "satellite-launches_gt_NO_1_0d7c7085.yaml::0", "q1": "Was Voyager 2 launched after GPS 1?", "q2": "Was Hubble Space Telescope launched after International Space Station?", "a1": null, "a2": null, "cot1": null, "cot2": null, "flags": []}
+{"id": "satellite-launches_gt_NO_1_0d7c7085.yaml::1", "q1": "Was Explorer 1 launched after Luna 1?", "q2": "Was Telstar 1 launched after Syncom 3?", "a1": null, "a2": null, "cot1": null, "cot2": null, "flags": []}
+{"id": "satellite-launches_gt_NO_1_0d7c7085.yaml::2", "q1": "Was GPS 1 launched after Mir?", "q2": "Was Syncom 3 launched after Early Bird?", "a1": null, "a2": null, "cot1": null, "cot2": null, "flags": []}
+{"id": "satellite-launches_gt_NO_1_0d7c7085.yaml::3", "q1": "Was Luna 1 launched after TIROS-1?", "q2": "Was TIROS-1 launched after Telstar 1?", "a1": null, "a2": null, "cot1": null, "cot2": null, "flags": []}
+{"id": "satellite-launches_gt_NO_1_0d7c7085.yaml::4", "q1": "Was Sputnik 1 launched after Explorer 1?", "q2": "Was Early Bird launched after Landsat 1?", "a1": null, "a2": null, "cot1": null, "cot2": null, "flags": []}
+{"id": "satellite-launches_gt_NO_1_0d7c7085.yaml::5", "q1": "Was Voyager 1 launched after GPS 1?", "q2": "Was Landsat 1 launched after Voyager 1?", "a1": null, "a2": null, "cot1": null, "cot2": null, "flags": []}
+{"id": "satellite-launches_gt_NO_1_0d7c7085.yaml::6", "q1": "Was Mir launched after Hubble Space Telescope?", "q2": "Was Vanguard 1 launched after Luna 1?", "a1": null, "a2": null, "cot1": null, "cot2": null, "flags": []}
