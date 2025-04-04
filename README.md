@@ -42,23 +42,18 @@ cotunfaithmech/
 │   ├── gsm8k.jsonl
 │   └── putnambench.jsonl
 ├── experiment_comparative/
-│   ├── hpc/
 │   ├── output/
 │   └── run_scripts/
 ├── experiment_logit_attribution/
-│   ├── hpc/
 │   ├── output/
 │   └── run_scripts/
 ├── experiment_generate_cot/
-│   ├── hpc/
 │   ├── output/
 │   └── run_scripts/
 ├── experiment_patch_hidden_states/
-│   ├── hpc/
 │   ├── output/
 │   └── run_scripts/
 ├── experiment_analyze_heads/
-│   ├── hpc/
 │   ├── output/
 │   └── run_scripts/
 ├── notebooks/
