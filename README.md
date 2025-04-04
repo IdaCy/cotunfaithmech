@@ -60,10 +60,6 @@ cotunfaithmech/
 │   ├── hpc/
 │   ├── output/
 │   └── run_scripts/
-├── experiment_logit_attribution/
-│   ├── hpc/
-│   ├── output/
-│   └── run_scripts/
 ├── notebooks/
 │   ├── exploratory_analysis.ipynb
 │   └── 
@@ -73,6 +69,7 @@ cotunfaithmech/
 │   ├── download_ivan_comparative.py
 │   └── 
 ├── requirements.txt
+├── environment.yml
 └── README.md
 ```
 
