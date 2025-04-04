@@ -1,6 +1,6 @@
 # CoT Unfaithful Mech Interp
 
-## STATUS - 04/04/25, 10:30
+## STATUS - 04/04/25, 12:00
 
 Done:  
 - data downloaded  
@@ -10,10 +10,11 @@ Done:
 - data new: tips Ivan
 - experiment comparative setup  
   - required utility script in `utils`  
-  - processing script in `experiment_comparative/run_scripts`  
+  - processing script in `experiment_comparative/run_scripts`
+- waiting for first experiment to run  
 
 Next:  
-- running comparative experiment
+- getting comparative experiment result
 - setting up other two data sorts experiemts  
 
 ## Plan:
