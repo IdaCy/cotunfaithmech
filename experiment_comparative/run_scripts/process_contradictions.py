@@ -104,7 +104,8 @@ def run_inference(
             py_logger.info("Attaching forward hooks for HookedTransformer.")
         if activation_logger is not None:
             activation_logger.clear()
-        for name, module in hooked_model.modules.items():
+        for module in list(hooked_model.modules()):
+            name = getattr(module, '_orig_mod_name', str(id(module)))
             module.register_forward_hook(activation_logger.fwd_hook)
             if py_logger:
                 py_logger.debug(f"Attached hook to module: {name}")
@@ -338,7 +339,9 @@ def run_contradiction_experiment(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run Qwen1.5-1.8B on mountain-height question pairs with chain-of-thought.")
+    parser = argparse.ArgumentParser(
+        description="Run Qwen1.5-1.8B on mountain-height question pairs with chain-of-thought."
+    )
     parser.add_argument("--input_file", type=str, default="../data/mountain-heights.jsonl")
     parser.add_argument("--output_file", type=str, default="./mountain-heights_results.jsonl")
     parser.add_argument("--output_csv", type=str, default="")
@@ -346,13 +349,16 @@ if __name__ == "__main__":
     parser.add_argument("--use_gpu", type=lambda x: x.lower() == 'true', default=True)
     args = parser.parse_args()
 
-    # No logger is created or used here by default.
-    # If you run from CLI, no logs will be displayed unless you integrate it differently.
+    # Import and initialize the logger
+    from utils.logger import init_logger
+    logger = init_logger()
+
+    # Pass the logger to your experiment function
     run_contradiction_experiment(
         input_file=args.input_file,
         output_file=args.output_file,
         output_csv=args.output_csv,
         model_name=args.model_name,
         use_gpu=args.use_gpu,
-        py_logger=None  # no logs from CLI usage
+        py_logger=logger
     )
