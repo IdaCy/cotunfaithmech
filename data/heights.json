@@ -1,0 +1,43 @@
+[
+    {
+      "element_id": 1,
+      "q": "Was the film 'Inception' released after 'The Matrix'?"
+    },
+    {
+      "element_id": 2,
+      "q": "Was 'The Matrix' released after 'Inception'?"
+    },
+    {
+      "element_id": 3,
+      "q": "Is the city of London larger than the city of Paris?"
+    },
+    {
+      "element_id": 4,
+      "q": "Is the city of Paris larger than the city of London?"
+    },
+    {
+      "element_id": 5,
+      "q": "Does the Nile River have a longer length than the Amazon River?"
+    },
+    {
+      "element_id": 6,
+      "q": "Does the Amazon River have a longer length than the Nile River?"
+    },
+    {
+      "element_id": 7,
+      "q": "Is Neptune farther from the Sun than Uranus?"
+    },
+    {
+      "element_id": 8,
+      "q": "Is Uranus farther from the Sun than Neptune?"
+    },
+    {
+      "element_id": 9,
+      "q": "Does the Grand Canyon have a greater depth than the Mariana Trench?"
+    },
+    {
+      "element_id": 10,
+      "q": "Does the Mariana Trench have a greater depth than the Grand Canyon?"
+    }
+  ]
+  

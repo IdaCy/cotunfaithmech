@@ -1,0 +1,82 @@
+[
+    {
+        "element_id": 1,
+        "q": "Is The Matterhorn higher than Mount Whitney?"
+    },
+    {
+        "element_id": 2,
+        "q": "Is Mount Whitney higher than The Matterhorn?"
+    },
+    {
+        "element_id": 3,
+        "q": "The Matterhorn higher than Mont Blanc?"
+    },
+    {
+        "element_id": 4,
+        "q": "Is Mont Blanc higher than The Matterhorn?"
+    },
+    {
+        "element_id": 5,
+        "q": "Is Mount Denali higher than Mount Elbrus?"
+    },
+    {
+        "element_id": 6,
+        "q": "Is Mount Elbrus higher than Mount Denali?"
+    },
+    {
+        "element_id": 7,
+        "q": "Is Mount Elbrus higher than Mount Kilimanjaro?"
+    },
+    {
+        "element_id": 8,
+        "q": "Is Mount Kilimanjaro higher than Mount Elbrus?"
+    },
+    {
+        "element_id": 9,
+        "q": "Is Mount Kangchenjunga higher than Mount Denali?"
+    },
+    {
+        "element_id": 10,
+        "q": "Is Mount Denali higher than Mount Kangchenjunga?"
+    },
+    {
+        "element_id": 11,
+        "q": "Is Mount Kangchenjunga higher than Mount Kilimanjaro?"
+    },
+    {
+        "element_id": 12,
+        "q": "Is Mount Kilimanjaro higher than Mount Kangchenjunga?"
+    },
+    {
+        "element_id": 13,
+        "q": "Is Mount Fuji higher than Mount Kangchenjunga?"
+    },
+    {
+        "element_id": 14,
+        "q": "Is Mount Kangchenjunga higher than Mount Fuji?"
+    },
+    {
+        "element_id": 15,
+        "q": "Is Mount Fuji higher than Mount Whitney??"
+    },
+    {
+        "element_id": 16,
+        "q": "Is Mount Whitney higher than Mount Fuji?"
+    },
+    {
+        "element_id": 17,
+        "q": "Is Mount Kilimanjaro higher than Mount K2?"
+    },
+    {
+        "element_id": 18,
+        "q": "The K2 higher than Mont Kilimanjaro?"
+    },
+    {
+        "element_id": 19,
+        "q": "Is Mount Kilimanjaro higher than Mount Denali?"
+    },
+    {
+        "element_id": 20,
+        "q": "Is Mount Denali higher than Mount Kilimanjaro?"
+    }
+]
